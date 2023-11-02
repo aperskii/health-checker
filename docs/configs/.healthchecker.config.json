@@ -1,0 +1,51 @@
+{
+  "app_name": "Health Checker",
+  "version": "v1.0",
+  "ping_response": {
+    "message": "pong",
+    "build_time": "2023-07-11T08:29:53.697Z",
+    "server_startup": "2023-07-11T08:29:53.697Z"
+  },
+  "log": {
+    "log_path": "./logs/",
+    "filename": "healthchecker",
+    "file_extension": ".log",
+    "level": "DEBUG",
+    "max_file_size": 209715200,
+    "max_age_days": 1,
+    "max_storage_size": 3221225472,
+    "log_stdout": true,
+    "log_stderr": false
+  },
+  "https_server": {
+    "network_type": "tcp4",
+    "port": 5030,
+    "certificate_public_key": "./certs/https/localhost.pem",
+    "certificate_private_key": "./certs/https/localhost-key.pem"
+  },
+  "auth_resource": {
+    "url": "https://local.auth.tc-s.eu",
+    "language": "de",
+    "resource_id": "healthchecker"
+  },
+  "auth_client": {
+    "url": "https://local.auth.tc-s.eu",
+    "client_id": "healthchecker",
+    "client_secret": "dVRHPITPh28WvMOtFSbUx6SoX16qIwEq_ZGF9E90LnwjK5Zaq_Hs6LOc63mv"
+  },
+    "resource": {
+      "accept_url": "https://nova-inte-int.api.sbb.ch:443/api/swisspass-photo-feedback/versions/1/feedback/accept",
+      "reject_url": "https://nova-inte-int.api.sbb.ch:443/api/swisspass-photo-feedback/versions/1/feedback/reject",
+      "error_url": "https://nova-inte-int.api.sbb.ch:443/api/swisspass-photo-feedback/versions/1/feedback/error",
+      "reference_photo_url": "https://nova-inte-int.api.sbb.ch:443/api/swisspass-photo-feedback/versions/1/feedback/referencePhoto",
+      "token_type": "Bearer",
+      "processor": {
+        "id": "TCS",
+        "type": "SCANPARTNERID"
+  },
+  "pgp": {
+    "private_key": "./keys/FE_NI_priv.asc",
+    "password": "i6hl1FsRIXa5sXf7recr7pJtIHDMDIKq6KhU0cixEVl7uQ5ECMOyVmaIfydE"
+  }
+}
+}
