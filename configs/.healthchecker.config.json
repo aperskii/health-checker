@@ -59,7 +59,8 @@
   "auth_client": {
     "url": "https://testauth.tc-s.eu",
     "client_id": "yberqiqch",
-    "client_secret": "bQ71z34laYySYhtc32R0VxtEwKWwtLnUyiA-ADmuhgKqWxnuwI9icWUTV0k8"
+    "client_secret": "bQ71z34laYySYhtc32R0VxtEwKWwtLnUyiA-ADmuhgKqWxnuwI9icWUTV0k8",
+    "grant_type": "client_credentials"
   },
   "mail_server": {
     "subject_prefix":  "HealthChecker",

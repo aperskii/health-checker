@@ -1,0 +1,1 @@
+ERROR     2023/11/06 14:14:46.233529 Called from A:/go/healthchecker/cmd/healthchecker/main.go, line #91, function main, open ./certs/https/localhost.pem: Das System kann den angegebenen Pfad nicht finden.

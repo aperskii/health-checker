@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"git.ghpcard.local/csipitca/aes"
+	"git.ghpcard.local/csipitca/email"
 	"git.ghpcard.local/csipitca/hash"
 	"git.ghpcard.local/csipitca/logcs"
 	"golang.org/x/crypto/ssh/terminal"
@@ -15,17 +16,11 @@ type Config struct {
 	AppName      string        `json:"app_name"`
 	Env          string        `json:"env"`
 	Version      string        `json:"version"`
-	PingResponse PingResponse  `json:"ping_response"`
 	Log          *logcs.Config `json:"log"`
 	HTTPSServer  HTTPSServer   `json:"https_server"`
 	AuthResource AuthResource  `json:"auth_resource"`
 	AuthClient   AuthClient    `json:"auth_client"`
-}
-
-type PingResponse struct {
-	Message       string `json:"message"`
-	BuildTime     string `json:"build_time"`
-	ServerStartup string `json:"server_startup"`
+	MailServer   *email.Config `json:"mail_server"`
 }
 
 type AuthClient struct {
@@ -34,7 +29,7 @@ type AuthClient struct {
 	Language     string `json:"language"`
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
-	RedirectURI  string `json:"redirect_uri"`
+	GrantType    string `json:"grant_type"`
 }
 
 type HTTPSServer struct {
@@ -48,11 +43,6 @@ type AuthResource struct {
 	URL        string `json:"url"`
 	Language   string `json:"language"`
 	ResourceID string `json:"resource_id"`
-}
-
-type PGP struct {
-	PrivateKey string `json:"private_key"`
-	Password   string `json:"password"`
 }
 
 func (c Config) isProd() bool {
