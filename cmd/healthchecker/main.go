@@ -31,7 +31,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	healthC := healthchecker.NewHealthChecker(cfg.AuthClient.URL, cfg.AuthClient.ClientID, cfg.AuthClient.ClientSecret, cfg.AuthClient.GrantType)
+	healthC, err := healthchecker.NewHealthChecker(cfg.AuthClient.URL, cfg.AuthClient.ClientID, cfg.AuthClient.ClientSecret, cfg.AuthClient.GrantType)
+	if err != nil {
+		logcs.Error(err)
+	}
 	healthC.InitialiteMonitoring()
 	//// Initiate email client
 	//emailClient, err := email.NewClient(cfg.MailServer, logger)

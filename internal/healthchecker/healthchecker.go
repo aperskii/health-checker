@@ -26,14 +26,37 @@ type tokenResponse struct {
 	IdToken      string `json:"id_token"`
 }
 
-func NewHealthChecker(authUrl, authUserName, authClientSecret, authGrantType string) *HealthChecker {
+func NewHealthChecker(authUrl, authUserName, authClientSecret, authGrantType string) (*HealthChecker, error) {
+	restyClient := resty.New()
+	resp, err := restyClient.SetHostURL(authUrl).R().
+		SetFormData(map[string]string{
+			"client_id":     authUserName,
+			"client_secret": authClientSecret,
+			"grant_type":    authGrantType,
+		}).
+		Post("/token")
+	if err != nil {
+		logcs.Error(err)
+		return nil, err
+	}
+	if resp.IsError() {
+		logcs.Error(fmt.Errorf("Status Code: %d; Body: %s", resp.StatusCode(), string(resp.Body())))
+		return nil, err
+	}
+	var response tokenResponse
+	err = json.Unmarshal(resp.Body(), &response)
+	if err != nil {
+		logcs.Error(err)
+		return nil, err
+	}
 	return &HealthChecker{
-		client:           resty.New(),
+		client:           restyClient,
 		authUrl:          authUrl,
 		authUserName:     authUserName,
 		authClientSecret: authClientSecret,
 		authGrantType:    authGrantType,
-	}
+		token:            response.AccessToken,
+	}, nil
 }
 
 func (self *HealthChecker) InitialiteMonitoring() {
@@ -84,7 +107,8 @@ func (self *HealthChecker) check() error {
 		logcs.Error(err)
 		return err
 	}
-	if string(resp.Body()) == "access_token_expired" {
+	if string(resp.Body()) == "access_token_expired" && resp.StatusCode() == 401 {
+		fmt.Println("NEW ACCESS TOKEN")
 		resp, err := client.SetHostURL(self.authUrl).R().
 			SetFormData(map[string]string{
 				"client_id":     self.authUserName,
@@ -121,7 +145,11 @@ func (self *HealthChecker) check() error {
 				logcs.Error(err)
 				return err
 			}
-			fmt.Println(x)
+			for key, element := range x {
+				if element == "nok" {
+					fmt.Println(x["error"])
+				}
+			}
 		}
 	}
 	return nil

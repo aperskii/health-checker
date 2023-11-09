@@ -1,2 +1,0 @@
-ERROR     2023/11/06 14:35:18.662708 Called from C:/Users/Yassine Berqiqch/go/pkg/mod/git.ghpcard.local/csipitca/auth@v1.9.7/clientcredentialsclient.go, line #58, function refreshToken, invalid_client
-ERROR     2023/11/06 14:35:18.663234 Called from A:/go/healthchecker/cmd/healthchecker/main.go, line #43, function main, invalid_client

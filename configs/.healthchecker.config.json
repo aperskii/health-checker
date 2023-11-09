@@ -41,7 +41,8 @@
       "method": "GET"
     },{
       "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
+      "method": "GET",
+      "email": "robel@test.com"
     },{
       "url": "https://pinmanager-test.shell.com/v1/health",
       "method": "GET"
