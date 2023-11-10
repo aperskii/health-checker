@@ -69,10 +69,10 @@
     "port":  25,
     "username": "noreply@ghpcard.local",
     "email_from":  "noreply@tc-s.eu",
-    "password": "Ikm0b5YXvsmaMkx4CjhBmjvQusmtlo09JI0xOw==",
+    "password": "6dEyJeYny-5Culojk1ScpaZMAIWzJOBT3EjNbFnbnij85I8g2gCaww==",
     "connection_security":  "STARTTLS",
     "auth_method": "LOGIN",
-    "templates_path":  "./views/mail/",
+    "templates_path":  "./views/",
     "templates_extensions": ".gohtml"
   }
 }

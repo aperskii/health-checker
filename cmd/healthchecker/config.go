@@ -98,6 +98,12 @@ func decryptConfig(c *Config, password string) (*Config, error) {
 	}
 	c.AuthClient.ClientSecret = authClientSecret
 
+	emailServerPassword, err := aesClient.Decrypt(c.MailServer.Password)
+	if err != nil {
+		return nil, err
+	}
+	c.MailServer.Password = emailServerPassword
+
 	if c.Log.LogErrEmail.Enabled {
 		logEmailPass, err := aesClient.Decrypt(c.Log.LogErrEmail.EmailCfg.Password)
 		if err != nil {
