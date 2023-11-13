@@ -43,8 +43,7 @@ func main() {
 	if err != nil {
 		logcs.Error(err)
 	}
-
-	healthC, err := healthchecker.NewHealthChecker(cfg.AuthClient.URL, cfg.AuthClient.ClientID, cfg.AuthClient.ClientSecret, cfg.AuthClient.GrantType, emailClient)
+	healthC, err := healthchecker.NewHealthChecker(cfg.AuthClient.URL, cfg.AuthClient.ClientID, cfg.AuthClient.ClientSecret, cfg.AuthClient.GrantType, emailClient, cfg.Application)
 	if err != nil {
 		logcs.Error(err)
 	}

@@ -7,6 +7,7 @@ import (
 	"git.ghpcard.local/csipitca/email"
 	"git.ghpcard.local/csipitca/hash"
 	"git.ghpcard.local/csipitca/logcs"
+	"github.com/healthchecker/internal/domain"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"syscall"
@@ -21,6 +22,7 @@ type Config struct {
 	AuthResource AuthResource  `json:"auth_resource"`
 	AuthClient   AuthClient    `json:"auth_client"`
 	MailServer   *email.Config `json:"mail_server"`
+	Application  domain.Apps   `json:"applications"`
 }
 
 type AuthClient struct {
@@ -111,7 +113,6 @@ func decryptConfig(c *Config, password string) (*Config, error) {
 		}
 		c.Log.LogErrEmail.EmailCfg.Password = logEmailPass
 	}
-
 	return c, nil
 }
 

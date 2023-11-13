@@ -14,41 +14,14 @@
   },
   "applications": [
     {
-      "url": "https://pinmanager-test.shell.com/v1/health",
+      "app_url": "https://pinmanager-test.shell.com/v1/health",
       "method": "GET",
       "recipients": ["dneidhold@tc-s.eu", "yberqiqch@tc-s.eu"]
     },
     {
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
+      "app_url": "https://yassine-test.shell.com/v1/health",
       "method": "GET",
-      "email": "robel@test.com"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
+      "recipients": ["test1@tc-s.eu", "test2@tc-s.eu"]
     }
   ],
   "https_server": {
