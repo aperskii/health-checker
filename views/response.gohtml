@@ -1,10 +1,12 @@
 Hallo,<br>
 <br>
 HealthChecker for {{.AppUrl}}<br>
-Info for {{.Info.Name}} Status is {{.Info.Status}}<br>
+Info for {{.Info.Name}} <br>
+Status : {{.Info.Status}}<br>
 <br>
-Error is : {{.Error.Info}}.<br>
+Error Name : {{.Error.Name}}.<br>
+Error details : {{.Error.Info}}.<br>
 <br>
-Details is : {{.Details}}<br>
+Details is : {{if .Details}} {{.Details}} {{else}} Not Found {{end}}<br>
 <br>
 <br>

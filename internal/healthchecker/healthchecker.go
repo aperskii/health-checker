@@ -23,7 +23,7 @@ type HealthChecker struct {
 	apps             domain.Apps
 }
 
-type tokenResponse struct {
+type TokenResponse struct {
 	TokenType    string `json:"token_type"`
 	ExpiresIn    int    `json:"expires_in"`
 	AccessToken  string `json:"access_token"`
@@ -33,23 +33,7 @@ type tokenResponse struct {
 
 func NewHealthChecker(authUrl, authUserName, authClientSecret, authGrantType string, emailClient *email.Client, apps domain.Apps) (*HealthChecker, error) {
 	restyClient := resty.New()
-	resp, err := restyClient.SetHostURL(authUrl).R().
-		SetFormData(map[string]string{
-			"client_id":     authUserName,
-			"client_secret": authClientSecret,
-			"grant_type":    authGrantType,
-		}).
-		Post("/token")
-	if err != nil {
-		logcs.Error(err)
-		return nil, err
-	}
-	if resp.IsError() {
-		logcs.Error(fmt.Errorf("Status Code: %d; Body: %s", resp.StatusCode(), string(resp.Body())))
-		return nil, err
-	}
-	var response tokenResponse
-	err = json.Unmarshal(resp.Body(), &response)
+	accessToken, err := GenerateToken(restyClient, authUrl, authUserName, authClientSecret, authGrantType)
 	if err != nil {
 		logcs.Error(err)
 		return nil, err
@@ -60,7 +44,7 @@ func NewHealthChecker(authUrl, authUserName, authClientSecret, authGrantType str
 		authUserName:     authUserName,
 		authClientSecret: authClientSecret,
 		authGrantType:    authGrantType,
-		token:            response.AccessToken,
+		token:            accessToken,
 		emailClient:      emailClient,
 		apps:             apps,
 	}, nil
@@ -85,7 +69,7 @@ type HealthResponse struct {
 	AppUrl  string
 	Info    Info
 	Error   Error
-	Details interface{}
+	Details map[string]interface{}
 }
 
 type Info struct {
@@ -113,29 +97,11 @@ func (self *HealthChecker) check() error {
 			return err
 		}
 		if string(resp.Body()) == "access_token_expired" && resp.StatusCode() == 401 {
-			fmt.Println("NEW ACCESS TOKEN")
-			resp, err := client.SetHostURL(self.authUrl).R().
-				SetFormData(map[string]string{
-					"client_id":     self.authUserName,
-					"client_secret": self.authClientSecret,
-					"grant_type":    self.authGrantType,
-				}).
-				Post("/token")
+			newToken, err := GenerateToken(client, self.authUrl, self.authUserName, self.authClientSecret, self.authGrantType)
 			if err != nil {
 				logcs.Error(err)
-				return err
 			}
-			if resp.IsError() {
-				logcs.Error(fmt.Errorf("status Code: %d; Body: %s", resp.StatusCode(), string(resp.Body())))
-				return nil
-			}
-			var response tokenResponse
-			err = json.Unmarshal(resp.Body(), &response)
-			if err != nil {
-				logcs.Error(err)
-				return err
-			}
-			self.token = response.AccessToken
+			self.token = newToken
 			err = self.check()
 			if err != nil {
 				logcs.Error(err)
@@ -170,11 +136,12 @@ func (self *HealthChecker) check() error {
 					}
 					if e == "error" {
 						if rec, ok := k.(map[string]interface{}); ok {
-							for key, _ := range rec {
-								result, o := rec[hr.Info.Name]
-								if o {
+							for key, v := range rec {
+								fmt.Println(key)
+								fmt.Println(v)
+								if key == hr.Info.Name {
 									hr.Error.Name = key
-									hr.Error.Info = result.(string)
+									hr.Error.Info = v.(string)
 								}
 							}
 						}
@@ -182,9 +149,10 @@ func (self *HealthChecker) check() error {
 					if e == "details" {
 						if rec, ok := k.(map[string]interface{}); ok {
 							for key, v := range rec {
-								hr.Details = "Details not found"
 								if key == hr.Info.Name {
-									hr.Details = v
+									hr.Details = map[string]interface{}{
+										key: v,
+									}
 								}
 							}
 						}
@@ -194,7 +162,7 @@ func (self *HealthChecker) check() error {
 				for _, k := range p.Recipients {
 					m.AddTo(k)
 				}
-				m.AddSubject("test HealthChecker")
+				m.AddSubject(u.Host)
 				m.AddHTMLBody("response.gohtml", hr)
 				if err := m.SendMessage(); err != nil {
 					logcs.Error(err)
@@ -204,4 +172,30 @@ func (self *HealthChecker) check() error {
 		}
 	}
 	return nil
+}
+
+// InitialiseClient Client with access token
+func GenerateToken(client *resty.Client, authUrl, authUserName, authClientSecret, authGrantType string) (string, error) {
+	resp, err := client.SetHostURL(authUrl).R().
+		SetFormData(map[string]string{
+			"client_id":     authUserName,
+			"client_secret": authClientSecret,
+			"grant_type":    authGrantType,
+		}).
+		Post("/token")
+	if err != nil {
+		logcs.Error(err)
+		return "", err
+	}
+	if resp.IsError() {
+		logcs.Error(fmt.Errorf("status Code: %d; Body: %s", resp.StatusCode(), string(resp.Body())))
+		return "", err
+	}
+	var response TokenResponse
+	err = json.Unmarshal(resp.Body(), &response)
+	if err != nil {
+		logcs.Error(err)
+		return "", err
+	}
+	return response.AccessToken, nil
 }
