@@ -137,8 +137,6 @@ func (self *HealthChecker) check() error {
 					if e == "error" {
 						if rec, ok := k.(map[string]interface{}); ok {
 							for key, v := range rec {
-								fmt.Println(key)
-								fmt.Println(v)
 								if key == hr.Info.Name {
 									hr.Error.Name = key
 									hr.Error.Info = v.(string)
