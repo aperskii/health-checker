@@ -22,7 +22,7 @@ type Config struct {
 	AuthResource AuthResource  `json:"auth_resource"`
 	AuthClient   AuthClient    `json:"auth_client"`
 	MailServer   *email.Config `json:"mail_server"`
-	Application  domain.Apps   `json:"applications"`
+	Application  []domain.App  `json:"applications"`
 }
 
 type AuthClient struct {
