@@ -1,2 +1,0 @@
-ERROR     2023/11/13 13:47:48.753817 Called from A:/go/healthchecker/internal/healthchecker/healthchecker.go, line #111, function check, Get "//pinmanager-test.shell.com%2Fv1%2Fhealth/pinmanager-test.shell.com/v1/health": unsupported protocol scheme ""
-ERROR     2023/11/13 13:47:48.753817 Called from A:/go/healthchecker/internal/healthchecker/healthchecker.go, line #79, function monitoring, Get "//pinmanager-test.shell.com%2Fv1%2Fhealth/pinmanager-test.shell.com/v1/health": unsupported protocol scheme ""
