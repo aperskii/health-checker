@@ -14,40 +14,9 @@
   },
   "applications": [
     {
-      "url": "https://pinmanager-test.shell.com/v1/health",
+      "app_url": "https://pinmanager-test.shell.com/v1/health",
       "method": "GET",
-      "recipients": ["dneidhold@tc-s.eu", "yberqiqch@tc-s.eu"]
-    },
-    {
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
-    },{
-      "url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET"
+      "recipients": ["yberqiqch@tc-s.eu"]
     }
   ],
   "https_server": {
@@ -59,7 +28,8 @@
   "auth_client": {
     "url": "https://testauth.tc-s.eu",
     "client_id": "yberqiqch",
-    "client_secret": "bQ71z34laYySYhtc32R0VxtEwKWwtLnUyiA-ADmuhgKqWxnuwI9icWUTV0k8"
+    "client_secret": "bQ71z34laYySYhtc32R0VxtEwKWwtLnUyiA-ADmuhgKqWxnuwI9icWUTV0k8",
+    "grant_type": "client_credentials"
   },
   "mail_server": {
     "subject_prefix":  "HealthChecker",
@@ -67,10 +37,10 @@
     "port":  25,
     "username": "noreply@ghpcard.local",
     "email_from":  "noreply@tc-s.eu",
-    "password": "Ikm0b5YXvsmaMkx4CjhBmjvQusmtlo09JI0xOw==",
+    "password": "6dEyJeYny-5Culojk1ScpaZMAIWzJOBT3EjNbFnbnij85I8g2gCaww==",
     "connection_security":  "STARTTLS",
     "auth_method": "LOGIN",
-    "templates_path":  "./views/mail/",
+    "templates_path":  "./views/",
     "templates_extensions": ".gohtml"
   }
 }

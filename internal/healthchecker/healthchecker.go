@@ -166,7 +166,6 @@ func (self *HealthChecker) check() error {
 					logcs.Error(err)
 					return err
 				}
-				fmt.Println(x)
 			}
 		}
 	}
