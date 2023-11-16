@@ -1,12 +1,12 @@
 Hallo,<br>
 <br>
-HealthChecker for {{.AppUrl}}<br>
-Info for {{.Info.Name}} <br>
-Status : {{.Info.Status}}<br>
+HealthChecker : <br><br>
+{{ range $key, $value := . }}
+Info for {{.Name}} <br>
+Status : {{.Status}}<br>
+Error : {{if .Error}} {{.Error}} {{else}} Not Found {{end}}.<br>
+Details : {{if .Details}} {{range $key, $value := .Details}} {{range $k, $v := $value}} {{$k}} {{$v}} <br>{{end}}{{end}}
+{{else}} Not Found {{end}}<br>
+<hr style="width:50%;text-align:left;margin-left:0">
 <br>
-Error Name : {{.Error.Name}}.<br>
-Error details : {{.Error.Info}}.<br>
-<br>
-Details is : {{if .Details}} {{.Details}} {{else}} Not Found {{end}}<br>
-<br>
-<br>
+{{end}}

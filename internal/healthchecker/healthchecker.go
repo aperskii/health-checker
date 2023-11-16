@@ -66,19 +66,10 @@ func (self *HealthChecker) monitoring() {
 }
 
 type HealthResponse struct {
-	AppUrl  string
-	Info    Info
-	Error   Error
+	Name    string
+	Status  string
+	Error   string
 	Details map[string]interface{}
-}
-
-type Info struct {
-	Name   string
-	Status string
-}
-type Error struct {
-	Name string
-	Info string
 }
 
 func (self *HealthChecker) check() error {
@@ -110,46 +101,52 @@ func (self *HealthChecker) check() error {
 		if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusInternalServerError {
 			var x map[string]interface{}
 			err = json.Unmarshal(resp.Body(), &x)
+			//file, err := ioutil.ReadFile("./response.json")
+			//err = json.Unmarshal(file, &x)
 			if err != nil {
 				logcs.Error(err)
 				return err
 			}
 			if x["status"] == "nok" || x["status"] == "warn" {
-				var hr HealthResponse
-				hr.AppUrl = p.AppURL
-				for e, k := range x {
-					if e == "info" {
+				var healthResponseMap = make(map[string]*HealthResponse)
+				for element, k := range x {
+					if element == "info" {
 						if rec, ok := k.(map[string]interface{}); ok {
 							for s, t := range rec {
 								if res, o := t.(map[string]interface{}); o {
-									for _, v := range res {
-										if v == "nok" || v == "warn" {
-											hr.Info.Name = s
-											hr.Info.Status = v.(string)
+									if res["status"] == "nok" || res["status"] == "warn" {
+										hr, f := healthResponseMap[s]
+										if !f {
+											hr = &HealthResponse{}
 										}
+										hr = &HealthResponse{}
+										healthResponseMap[s] = hr
+										hr.Name = s
+										hr.Status = fmt.Sprintf("%s", res["status"])
 									}
 								}
 							}
 						}
 					}
-					if e == "error" {
-						if rec, ok := k.(map[string]interface{}); ok {
-							for key, _ := range rec {
-								if key == hr.Info.Name {
-									if val, ok := rec[key]; ok {
-										hr.Error.Name = key
-										hr.Error.Info = fmt.Sprintf("%v", val)
-									}
-								}
-							}
-						}
-					}
-					if e == "details" {
+					if element == "error" {
 						if rec, ok := k.(map[string]interface{}); ok {
 							for key, v := range rec {
-								if key == hr.Info.Name {
-									hr.Details = map[string]interface{}{
-										key: v,
+								if _, ok := healthResponseMap[key]; ok {
+									if key == healthResponseMap[key].Name {
+										healthResponseMap[key].Error = fmt.Sprintf("%v", v)
+									}
+								}
+							}
+						}
+					}
+					if element == "details" {
+						if rec, ok := k.(map[string]interface{}); ok {
+							for key, v := range rec {
+								if _, ok := healthResponseMap[key]; ok {
+									if key == healthResponseMap[key].Name && v != nil {
+										healthResponseMap[key].Details = map[string]interface{}{
+											key: v,
+										}
 									}
 								}
 							}
@@ -161,11 +158,19 @@ func (self *HealthChecker) check() error {
 					m.AddTo(k)
 				}
 				m.AddSubject(u.Host)
-				m.AddHTMLBody("response.gohtml", hr)
+				m.AddHTMLBody("response.gohtml", healthResponseMap)
 				if err := m.SendMessage(); err != nil {
 					logcs.Error(err)
 					return err
 				}
+				//fmt.Println(healthResponseMap)
+				//for k, v := range healthResponseMap {
+				//	fmt.Printf("error is : %s\n", k)
+				//	fmt.Println(v.Name)
+				//	fmt.Println(v.Status)
+				//	fmt.Println(v.Error)
+				//	fmt.Println(v.Details)
+				//}
 			}
 		}
 	}
