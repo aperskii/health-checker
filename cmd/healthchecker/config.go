@@ -18,7 +18,6 @@ type Config struct {
 	Env          string        `json:"env"`
 	Version      string        `json:"version"`
 	Log          *logcs.Config `json:"log"`
-	HTTPSServer  HTTPSServer   `json:"https_server"`
 	AuthResource AuthResource  `json:"auth_resource"`
 	AuthClient   AuthClient    `json:"auth_client"`
 	MailServer   *email.Config `json:"mail_server"`
@@ -32,13 +31,6 @@ type AuthClient struct {
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
 	GrantType    string `json:"grant_type"`
-}
-
-type HTTPSServer struct {
-	NetworkType string `json:"network_type"`
-	Port        int    `json:"port"`
-	PublicKey   string `json:"certificate_public_key"`
-	PrivateKey  string `json:"certificate_private_key"`
 }
 
 type AuthResource struct {

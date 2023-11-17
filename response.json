@@ -36,12 +36,16 @@
     "ssps-forms": {
       "response-time": "30.545597ms",
       "status": "warn"
+    },
+    "danyal": {
+      "response-time": "30.545597ms",
+      "status": "nok"
     }
   },
   "error": {
     "http": "request failed: Get \"https://pinmanager-test.shell.com\": x509: certificate signed by unknown authority",
     "hsm": "tesssssssssssssssssssssssssssssssst",
-    "mysql": "mysql problem"
+    "danyal": "dany is maschine"
   },
   "details": {
     "app": {
@@ -75,9 +79,8 @@
       "not-downloaded": 52771,
       "total-available": 99999
     },
-  "http": {
-    "yassine": "test",
-    "total-available": 99999
+  "danyal": {
+    "yassine": "test"
   }
   }
 }
