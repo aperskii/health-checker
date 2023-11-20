@@ -47,7 +47,7 @@ func main() {
 	if err != nil {
 		logcs.Error(err)
 	}
-	healthC.InitialiteMonitoring()
+	healthC.InitialiseMonitoring()
 
 	for {
 

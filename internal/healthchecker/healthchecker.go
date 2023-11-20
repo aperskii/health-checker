@@ -54,7 +54,7 @@ func NewHealthChecker(authUrl, authUserName, authClientSecret, authGrantType str
 	return healthChecker, nil
 }
 
-func (self *HealthChecker) InitialiteMonitoring() {
+func (self *HealthChecker) InitialiseMonitoring() {
 	go self.monitoring()
 }
 
@@ -103,37 +103,47 @@ func (self *HealthChecker) check() error {
 			}
 		}
 		if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusInternalServerError {
-			var x map[string]interface{}
-			err = json.Unmarshal(resp.Body(), &x)
+			var jsonResponse map[string]interface{}
+			err = json.Unmarshal(resp.Body(), &jsonResponse)
 			if err != nil {
 				logcs.Error(err)
 				return err
 			}
-			if x["status"] == "nok" || x["status"] == "warn" {
+			if jsonResponse["status"] == "nok" || jsonResponse["status"] == "warn" {
+				// create Map to store the health response
 				var healthResponseMap = make(map[string]*HealthResponse)
-				for _, elem := range jsonOrder {
-					for element, k := range x {
-						if element == elem {
-							if rec, ok := k.(map[string]interface{}); ok {
-								for s, t := range rec {
-									if res, o := t.(map[string]interface{}); o {
-										if res["status"] == "nok" || res["status"] == "warn" {
-											hr, f := healthResponseMap[s]
+				// iterate by the slice of string for ordered the map of the response json
+				for _, sortElement := range jsonOrder {
+					// iterate by the json response
+					for element, key := range jsonResponse {
+						// ordered the map json to check first the status -> info -> error -> details
+						if element == sortElement {
+							if keyIsMap, ok := key.(map[string]interface{}); ok {
+								// range by Element info to check which component is not ok
+								for elem, value := range keyIsMap {
+									if valueIsMap, yes := value.(map[string]interface{}); yes {
+										// check the value of status of the component if not ok or warn
+										if valueIsMap["status"] == "nok" || valueIsMap["status"] == "warn" {
+											// initialise the map
+											healthResponse, f := healthResponseMap[elem]
 											if !f {
-												hr = &HealthResponse{}
+												healthResponse = &HealthResponse{}
 											}
-											hr = &HealthResponse{}
-											healthResponseMap[s] = hr
-											hr.Name = s
-											hr.Status = fmt.Sprintf("%s", res["status"])
+											healthResponse = &HealthResponse{}
+											healthResponseMap[elem] = healthResponse
+											// put the name and status of component which is not ok in map
+											healthResponse.Name = elem
+											healthResponse.Status = fmt.Sprintf("%s", valueIsMap["status"])
 										}
 									}
-									if _, ok := healthResponseMap[s]; ok && element == "error" {
-										healthResponseMap[s].Error = fmt.Sprintf("%v", t)
+									// check if there is an error for the component which is not ok
+									if _, ok := healthResponseMap[elem]; ok && element == "error" {
+										healthResponseMap[elem].Error = fmt.Sprintf("%v", value)
 									}
-									if _, ok := healthResponseMap[s]; ok && element == "details" {
-										healthResponseMap[s].Details = map[string]interface{}{
-											s: t,
+									// check if there is an details for the component which is not ok
+									if _, ok := healthResponseMap[elem]; ok && element == "details" {
+										healthResponseMap[elem].Details = map[string]interface{}{
+											elem: value,
 										}
 									}
 								}
@@ -141,7 +151,7 @@ func (self *HealthChecker) check() error {
 						}
 					}
 				}
-
+				// initialise email to the recipients
 				m := self.emailClient.NewHTMLMessage()
 				for _, k := range p.Recipients {
 					m.AddTo(k)
@@ -158,7 +168,7 @@ func (self *HealthChecker) check() error {
 	return nil
 }
 
-// InitialiseClient Client with access token
+// GenerateToken InitialiseClient Client with access token
 func (self *HealthChecker) GenerateToken() error {
 	resp, err := self.client.SetHostURL(self.authUrl).R().
 		SetFormData(map[string]string{
