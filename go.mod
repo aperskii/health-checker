@@ -1,6 +1,6 @@
 module github.com/healthchecker
 
-go 1.21.3
+go 1.21
 
 require (
 	git.ghpcard.local/csipitca/aes v1.2.1
