@@ -82,6 +82,7 @@ func (self *HealthChecker) check() error {
 		u, err := url.Parse(p.AppURL)
 		if err != nil {
 			logcs.Error(err)
+			return err
 		}
 		resp, err := self.client.SetHostURL(fmt.Sprintf("%s://%s", u.Scheme, u.Hostname())).R().
 			SetHeader("Accept", "application/json").
@@ -95,11 +96,12 @@ func (self *HealthChecker) check() error {
 			err := self.GenerateToken()
 			if err != nil {
 				logcs.Error(err)
+				return err
 			}
 			err = self.check()
 			if err != nil {
 				logcs.Error(err)
-				return nil
+				return err
 			}
 		}
 		if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusInternalServerError {
