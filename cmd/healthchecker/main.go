@@ -49,7 +49,6 @@ func main() {
 	}
 	healthC.InitialiseMonitoring()
 
-	for {
-
-	}
+	ch := make(chan int)
+	<-ch
 }
