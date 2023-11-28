@@ -1,7 +1,9 @@
 package domain
 
+import "time"
+
 type App struct {
-	AppURL     string   `json:"app_url"`
-	Method     string   `json:"method"`
-	Recipients []string `json:"recipients"`
+	AppURL               string        `json:"app_url"`
+	Recipients           []string      `json:"recipients"`
+	CheckIntervalSeconds time.Duration `json:"check_interval_seconds"`
 }

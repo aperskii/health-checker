@@ -20,7 +20,7 @@ type Config struct {
 	Log          *logcs.Config `json:"log"`
 	AuthResource AuthResource  `json:"auth_resource"`
 	AuthClient   AuthClient    `json:"auth_client"`
-	MailServer   *email.Config `json:"mail_server"`
+	MailServer   *email.Config `json:"email_config"`
 	Application  []domain.App  `json:"applications"`
 }
 
@@ -91,20 +91,20 @@ func decryptConfig(c *Config, password string) (*Config, error) {
 		return nil, err
 	}
 	c.AuthClient.ClientSecret = authClientSecret
-
-	emailServerPassword, err := aesClient.Decrypt(c.MailServer.Password)
-	if err != nil {
-		return nil, err
-	}
-	c.MailServer.Password = emailServerPassword
-
-	if c.Log.LogErrEmail.Enabled {
-		logEmailPass, err := aesClient.Decrypt(c.Log.LogErrEmail.EmailCfg.Password)
+	for k, v := range c.MailServer.Hosts {
+		emailServerPassword, err := aesClient.Decrypt(v.Password)
 		if err != nil {
 			return nil, err
 		}
-		c.Log.LogErrEmail.EmailCfg.Password = logEmailPass
+		c.MailServer.Hosts[k].Password = emailServerPassword
 	}
+	//if c.Log.LogErrEmail.Enabled {
+	//	logEmailPass, err := aesClient.Decrypt(c.Log.LogErrEmail.EmailCfg.Hosts[k].Password)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	c.Log.LogErrEmail.EmailCfg.Hosts[k].Password = logEmailPass
+	//}
 	return c, nil
 }
 
