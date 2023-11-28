@@ -10,13 +10,46 @@
     "max_age_days": 1,
     "max_storage_size": 3221225472,
     "log_stdout": true,
-    "log_stderr": false
+    "log_stderr": false,
+    "archive_path" : ".logs/archive",
+    "log_err_email" : {
+      "enabled" : false,
+      "clear_cache_interval_seconds" : 99999999,
+      "alert_recipients" : ["test@tc-s.eu"],
+      "email_config": {
+        "subject_prefix":  "Logs HealthChecker",
+        "hosts": [
+          {
+            "hostname": "mail2.tc-s.eu",
+            "port":  25,
+            "username": "noreply@ghpcard.local",
+            "email_from":  "noreply@tc-s.eu",
+            "password": "6dEyJeYny-5Culojk1ScpaZMAIWzJOBT3EjNbFnbnij85I8g2gCaww==",
+            "connection_security":  "STARTTLS",
+            "auth_method": "LOGIN",
+            "insecure_skip_verify" : true
+          }
+        ],
+        "templates_path":  "",
+        "templates_extensions": ""
+      }
+    }
   },
   "applications": [
     {
       "app_url": "https://pinmanager-test.shell.com/v1/health",
-      "method": "GET",
-      "recipients": ["yberqiqch@tc-s.eu"]
+      "recipients": ["yberqiqch@tc-s.eu"],
+      "check_interval_seconds": 5
+    },
+    {
+      "app_url": "https://pinmanager-test.shell.com/v1/health",
+      "recipients": ["yberqiqch@tc-s.eu"],
+      "check_interval_seconds": 15
+    },
+    {
+      "app_url": "https://pinmanager-test.shell.com/v1/health",
+      "recipients": ["yberqiqch@tc-s.eu"],
+      "check_interval_seconds": 120
     }
   ],
   "auth_client": {
@@ -25,15 +58,20 @@
     "client_secret": "bQ71z34laYySYhtc32R0VxtEwKWwtLnUyiA-ADmuhgKqWxnuwI9icWUTV0k8",
     "grant_type": "client_credentials"
   },
-  "mail_server": {
+  "email_config": {
     "subject_prefix":  "HealthChecker",
-    "hostname": "mail2.tc-s.eu",
-    "port":  25,
-    "username": "noreply@ghpcard.local",
-    "email_from":  "noreply@tc-s.eu",
-    "password": "6dEyJeYny-5Culojk1ScpaZMAIWzJOBT3EjNbFnbnij85I8g2gCaww==",
-    "connection_security":  "STARTTLS",
-    "auth_method": "LOGIN",
+    "hosts": [
+      {
+        "hostname": "mail2.tc-s.eu",
+        "port":  25,
+        "username": "noreply@ghpcard.local",
+        "email_from":  "noreply@tc-s.eu",
+        "password": "6dEyJeYny-5Culojk1ScpaZMAIWzJOBT3EjNbFnbnij85I8g2gCaww==",
+        "connection_security":  "STARTTLS",
+        "auth_method": "LOGIN",
+        "insecure_skip_verify" : true
+      }
+    ],
     "templates_path":  "./views/",
     "templates_extensions": ".gohtml"
   }
