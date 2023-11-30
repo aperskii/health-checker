@@ -85,26 +85,25 @@ func decryptConfig(c *Config, password string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	authClientSecret, err := aesClient.Decrypt(c.AuthClient.ClientSecret)
 	if err != nil {
 		return nil, err
 	}
 	c.AuthClient.ClientSecret = authClientSecret
-	for keyHostArray, valueHostArray := range c.MailServer.Hosts {
-		emailServerPassword, err := aesClient.Decrypt(valueHostArray.Password)
+	for hostKey, hostValue := range c.MailServer.Hosts {
+		emailServerPassword, err := aesClient.Decrypt(hostValue.Password)
 		if err != nil {
 			return nil, err
 		}
-		c.MailServer.Hosts[keyHostArray].Password = emailServerPassword
+		c.MailServer.Hosts[hostKey].Password = emailServerPassword
 	}
 	if c.Log.LogErrEmail.Enabled {
-		for keyLogErrEmailArray, _ := range c.Log.LogErrEmail.EmailCfg.Hosts {
-			logEmailPass, err := aesClient.Decrypt(c.Log.LogErrEmail.EmailCfg.Hosts[keyLogErrEmailArray].Password)
+		for LogErrEmail, _ := range c.Log.LogErrEmail.EmailCfg.Hosts {
+			logEmailPass, err := aesClient.Decrypt(c.Log.LogErrEmail.EmailCfg.Hosts[LogErrEmail].Password)
 			if err != nil {
 				return nil, err
 			}
-			c.Log.LogErrEmail.EmailCfg.Hosts[keyLogErrEmailArray].Password = logEmailPass
+			c.Log.LogErrEmail.EmailCfg.Hosts[LogErrEmail].Password = logEmailPass
 		}
 	}
 	return c, nil

@@ -35,18 +35,8 @@ func (self *HealthChecker) InitialiseMonitoring() {
 }
 
 func (self *HealthChecker) monitoring() {
-	tc := time.NewTicker(15 * time.Second)
-	for {
-		<-tc.C
-		for _, app := range self.apps {
-			app := app
-			go func() {
-				err := self.check(app)
-				if err != nil {
-					logcs.Error(err)
-				}
-			}()
-		}
+	for _, app := range self.apps {
+		go self.check(app)
 	}
 }
 
@@ -58,63 +48,63 @@ type HealthResponse struct {
 	Details map[string]interface{}
 }
 
-func (self *HealthChecker) check(app domain.App) error {
+func (self *HealthChecker) check(app domain.App) {
 	for {
 		tc := time.NewTicker(app.CheckIntervalSeconds * time.Second)
 		<-tc.C
 		u, err := url.Parse(app.AppURL)
 		if err != nil {
 			logcs.Error(err)
-			return err
+			continue
 		}
 		authResourceClient := self.authClient.NewResourceClient(fmt.Sprintf("%s://%s", u.Scheme, u.Hostname()))
 		resp, err := authResourceClient.GET(u.Path)
 		if err != nil {
 			logcs.Error(err)
-			return err
+			continue
 		}
 		if resp.IsError() && resp.IsInternalServerError() {
 			var jsonResponse map[string]interface{}
 			err = json.Unmarshal(resp.Body(), &jsonResponse)
 			if err != nil {
 				logcs.Error(err)
-				return err
+				continue
 			}
 			if jsonResponse["status"] == "nok" || jsonResponse["status"] == "warn" {
 				// create Map to store the health response
 				var healthResponseMap = make(map[string]*HealthResponse)
 				// iterate by the slice of string for ordered the map of the response json
-				for _, sortElementJson := range jsonOrder {
+				for _, orderedMap := range jsonOrder {
 					// iterate by the json response
-					for keyJsonResponce, valueJsonResponce := range jsonResponse {
+					for responseKey, responseValue := range jsonResponse {
 						// ordered the map json to check first the status -> info -> error -> details
-						if keyJsonResponce == sortElementJson {
-							if valueJsonResponceIsMap, ok := valueJsonResponce.(map[string]interface{}); ok {
+						if responseKey == orderedMap {
+							if responseValueMap, ok := responseValue.(map[string]interface{}); ok {
 								// range by Element info to check which component is not ok
-								for keyMapValueJsonResponce, valueMapValueJsonResponce := range valueJsonResponceIsMap {
-									if valueMapValueJsonResponceIsMap, yes := valueMapValueJsonResponce.(map[string]interface{}); yes {
+								for componentName, componentInfo := range responseValueMap {
+									if componentInfoMap, yes := componentInfo.(map[string]interface{}); yes {
 										// check the value of status of the component if not ok or warn
-										if valueMapValueJsonResponceIsMap["status"] == "nok" || valueMapValueJsonResponceIsMap["status"] == "warn" {
+										if componentInfoMap["status"] == "nok" || componentInfoMap["status"] == "warn" {
 											// initialise the map
-											healthResponse, f := healthResponseMap[keyMapValueJsonResponce]
+											healthResponse, f := healthResponseMap[componentName]
 											if !f {
 												healthResponse = &HealthResponse{}
 											}
 											healthResponse = &HealthResponse{}
-											healthResponseMap[keyMapValueJsonResponce] = healthResponse
+											healthResponseMap[componentName] = healthResponse
 											// put the name and status of component which is not ok in map
-											healthResponse.Name = keyMapValueJsonResponce
-											healthResponse.Status = fmt.Sprintf("%s", valueMapValueJsonResponceIsMap["status"])
+											healthResponse.Name = componentName
+											healthResponse.Status = fmt.Sprintf("%s", componentInfoMap["status"])
 										}
 									}
 									// check if there is an error for the component which is not ok
-									if _, ok := healthResponseMap[keyMapValueJsonResponce]; ok && keyJsonResponce == "error" {
-										healthResponseMap[keyMapValueJsonResponce].Error = fmt.Sprintf("%v", valueMapValueJsonResponce)
+									if _, ok := healthResponseMap[componentName]; ok && responseKey == "error" {
+										healthResponseMap[componentName].Error = fmt.Sprintf("%v", componentInfo)
 									}
 									// check if there is an details for the component which is not ok
-									if _, ok := healthResponseMap[keyMapValueJsonResponce]; ok && keyJsonResponce == "details" {
-										healthResponseMap[keyMapValueJsonResponce].Details = map[string]interface{}{
-											keyMapValueJsonResponce: valueMapValueJsonResponce,
+									if _, ok := healthResponseMap[componentName]; ok && responseKey == "details" {
+										healthResponseMap[componentName].Details = map[string]interface{}{
+											componentName: componentInfo,
 										}
 									}
 								}
@@ -131,10 +121,9 @@ func (self *HealthChecker) check(app domain.App) error {
 				m.AddHTMLBody("response.gohtml", healthResponseMap)
 				if err := m.SendMessage(); err != nil {
 					logcs.Error(err)
-					return err
+					continue
 				}
 			}
 		}
-		return nil
 	}
 }
