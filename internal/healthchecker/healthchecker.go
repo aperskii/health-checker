@@ -86,8 +86,8 @@ func (self *HealthChecker) check(app domain.App) {
 										// check the value of status of the component if not ok or warn
 										if componentInfoMap["status"] == "nok" || componentInfoMap["status"] == "warn" {
 											// initialise the map
-											healthResponse, f := healthResponseMap[componentName]
-											if !f {
+											healthResponse, ok := healthResponseMap[componentName]
+											if !ok {
 												healthResponse = &HealthResponse{}
 											}
 											healthResponse = &HealthResponse{}
