@@ -40,16 +40,6 @@
       "app_url": "https://pinmanager-test.shell.com/v1/health",
       "recipients": ["yberqiqch@tc-s.eu"],
       "check_interval_seconds": 5
-    },
-    {
-      "app_url": "https://pinmanager-test.shell.com/v1/health",
-      "recipients": ["yberqiqch@tc-s.eu"],
-      "check_interval_seconds": 15
-    },
-    {
-      "app_url": "https://pinmanager-test.shell.com/v1/health",
-      "recipients": ["yberqiqch@tc-s.eu"],
-      "check_interval_seconds": 120
     }
   ],
   "auth_client": {
