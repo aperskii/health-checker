@@ -41,11 +41,12 @@ func (self *HealthChecker) monitoring() {
 }
 
 type HealthResponse struct {
-	AppUrl  string
-	Name    string
-	Status  string
-	Error   string
-	Details map[string]interface{}
+	AppUrl   string
+	Name     string
+	Status   string
+	Error    string
+	Details  map[string]interface{}
+	NewError bool
 }
 
 func (self *HealthChecker) check(app domain.App) {
@@ -63,6 +64,12 @@ func (self *HealthChecker) check(app domain.App) {
 			logcs.Error(err)
 			continue
 		}
+		// create Map to store the health response
+		var healthResponseMap = make(map[string]*HealthResponse)
+		var previousResponce = make(map[string]*HealthResponse)
+		if len(previousResponce) == 0 {
+			previousResponce = healthResponseMap
+		}
 		if resp.IsError() && resp.IsInternalServerError() {
 			var jsonResponse map[string]interface{}
 			err = json.Unmarshal(resp.Body(), &jsonResponse)
@@ -71,8 +78,6 @@ func (self *HealthChecker) check(app domain.App) {
 				continue
 			}
 			if jsonResponse["status"] == "nok" || jsonResponse["status"] == "warn" {
-				// create Map to store the health response
-				var healthResponseMap = make(map[string]*HealthResponse)
 				// iterate by the slice of string for ordered the map of the response json
 				for _, orderedMap := range jsonOrder {
 					// iterate by the json response
@@ -95,6 +100,7 @@ func (self *HealthChecker) check(app domain.App) {
 											// put the name and status of component which is not ok in map
 											healthResponse.Name = componentName
 											healthResponse.Status = fmt.Sprintf("%s", componentInfoMap["status"])
+											healthResponse.NewError = false
 										}
 									}
 									// check if there is an error for the component which is not ok
@@ -112,18 +118,41 @@ func (self *HealthChecker) check(app domain.App) {
 						}
 					}
 				}
-				// initialise email to the recipients
-				m := self.emailClient.NewHTMLMessage()
-				for _, k := range app.Recipients {
-					m.AddTo(k)
+				fmt.Println("map before ", previousResponce)
+				if ok := compareMaps(healthResponseMap, previousResponce); ok {
+					self.sendEmail(app, u.Host, healthResponseMap)
+					return
+				} else {
+					fmt.Println("is the same error")
+					//<-time.After(app.SendEmailSeconds * time.Second)
+					//self.sendEmail(app, u.Host, healthResponseMap)
 				}
-				m.AddSubject(u.Host)
-				m.AddHTMLBody("response.gohtml", healthResponseMap)
-				if err := m.SendMessage(); err != nil {
-					logcs.Error(err)
-					continue
-				}
+				previousResponce = healthResponseMap
+				fmt.Println("map after ", previousResponce)
 			}
 		}
+	}
+}
+
+func compareMaps(nextMap, prevMap map[string]*HealthResponse) bool {
+	for i, v := range nextMap {
+		if v.Error != prevMap[i].Error {
+			return true
+		}
+	}
+	return false
+}
+
+func (self *HealthChecker) sendEmail(app domain.App, hostname string, response map[string]*HealthResponse) {
+	// initialise email to the recipients
+	m := self.emailClient.NewHTMLMessage()
+	for _, k := range app.Recipients {
+		m.AddTo(k)
+	}
+	m.AddSubject(hostname)
+	m.AddHTMLBody("response.gohtml", response)
+	if err := m.SendMessage(); err != nil {
+		logcs.Error(err)
+		return
 	}
 }
