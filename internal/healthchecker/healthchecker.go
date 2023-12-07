@@ -52,6 +52,8 @@ type HealthResponse struct {
 func (self *HealthChecker) check(app domain.App) {
 	for {
 		tc := time.NewTicker(app.CheckIntervalSeconds * time.Second)
+		//Start timer for 3 seconds
+		MyTimer := time.NewTimer(app.SendEmailSeconds * time.Second)
 		<-tc.C
 		u, err := url.Parse(app.AppURL)
 		if err != nil {
@@ -121,9 +123,16 @@ func (self *HealthChecker) check(app domain.App) {
 				fmt.Println("map before ", previousResponce)
 				if ok := compareMaps(healthResponseMap, previousResponce); ok {
 					self.sendEmail(app, u.Host, healthResponseMap)
-					return
+					continue
 				} else {
 					fmt.Println("is the same error")
+					select {
+					case <-MyTimer.C:
+						self.sendEmail(app, u.Host, healthResponseMap)
+						break
+					default:
+						continue
+					}
 					//<-time.After(app.SendEmailSeconds * time.Second)
 					//self.sendEmail(app, u.Host, healthResponseMap)
 				}
