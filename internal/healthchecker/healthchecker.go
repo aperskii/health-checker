@@ -128,7 +128,7 @@ func (self *HealthChecker) check(app domain.App) {
 					fmt.Println("is the same error")
 					select {
 					case <-MyTimer.C:
-						self.(app, u.Host, healthResponseMap)
+						self.sendEmail(app, u.Host, healthResponseMap)
 						break
 					default:
 						continue
