@@ -2,7 +2,6 @@ package main
 
 import (
 	"git.ghpcard.local/csipitca/auth"
-	"git.ghpcard.local/csipitca/email"
 	"git.ghpcard.local/csipitca/logcs"
 	"github.com/healthchecker/internal/healthchecker"
 	"log"
@@ -45,14 +44,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Initiate email client
-	emailClient, err := email.NewClient(cfg.MailServer, logger)
+	healthC, err := healthchecker.NewHealthChecker(authClient, cfg.Application)
 	if err != nil {
 		logcs.Error(err)
-	}
-	healthC, err := healthchecker.NewHealthChecker(authClient, emailClient, cfg.Application)
-	if err != nil {
-		logcs.Error(err)
+		os.Exit(1)
 	}
 	healthC.InitialiseMonitoring()
 

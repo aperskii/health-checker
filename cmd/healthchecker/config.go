@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"git.ghpcard.local/csipitca/aes"
-	"git.ghpcard.local/csipitca/email"
 	"git.ghpcard.local/csipitca/hash"
 	"git.ghpcard.local/csipitca/logcs"
 	"github.com/healthchecker/internal/domain"
@@ -20,14 +19,11 @@ type Config struct {
 	Log          *logcs.Config `json:"log"`
 	AuthResource AuthResource  `json:"auth_resource"`
 	AuthClient   AuthClient    `json:"auth_client"`
-	MailServer   *email.Config `json:"email_config"`
 	Application  []domain.App  `json:"applications"`
 }
 
 type AuthClient struct {
 	URL          string `json:"url"`
-	LocalURL     string `json:"local_url"`
-	Language     string `json:"language"`
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
 	GrantType    string `json:"grant_type"`
@@ -90,20 +86,13 @@ func decryptConfig(c *Config, password string) (*Config, error) {
 		return nil, err
 	}
 	c.AuthClient.ClientSecret = authClientSecret
-	for hostKey, hostValue := range c.MailServer.Hosts {
-		emailServerPassword, err := aesClient.Decrypt(hostValue.Password)
-		if err != nil {
-			return nil, err
-		}
-		c.MailServer.Hosts[hostKey].Password = emailServerPassword
-	}
-	if c.Log.LogErrEmail.Enabled {
-		for LogErrEmail, _ := range c.Log.LogErrEmail.EmailCfg.Hosts {
-			logEmailPass, err := aesClient.Decrypt(c.Log.LogErrEmail.EmailCfg.Hosts[LogErrEmail].Password)
+	if c.Log.LogEmail.Enabled {
+		for i, host := range c.Log.LogEmail.EmailCfg.Hosts {
+			decryptedPassword, err := aesClient.Decrypt(host.Password)
 			if err != nil {
 				return nil, err
 			}
-			c.Log.LogErrEmail.EmailCfg.Hosts[LogErrEmail].Password = logEmailPass
+			c.Log.LogEmail.EmailCfg.Hosts[i].Password = decryptedPassword
 		}
 	}
 	return c, nil
