@@ -50,7 +50,7 @@ func (self *HealthChecker) check(app domain.App) {
 		tc := time.NewTicker(app.CheckIntervalSeconds * time.Second)
 		<-tc.C
 		u, err := url.Parse(app.AppURL)
-		logcs.Debug(u.String())
+		logcs.Debug(fmt.Sprintf("app url %v", u.String()))
 		if err != nil {
 			logcs.Fatal(err)
 			continue
@@ -61,10 +61,10 @@ func (self *HealthChecker) check(app domain.App) {
 			logcs.Fatal(err)
 			continue
 		} else {
-			logcs.Success("Your request was successfully submitted")
+			logcs.Success("Request was successfully submitted")
 		}
 		if resp.IsError() && resp.IsInternalServerError() {
-			logcs.Info("Http Response Error / Status Code > 399 or == 500")
+			logcs.Info(fmt.Sprintf("Http Status Error : %d", resp.StatusCode()))
 			//create Map to store the health response
 			var healthResponseMap = make(map[string]*HealthResponse)
 			var jsonResponse map[string]interface{}
@@ -102,7 +102,7 @@ func (self *HealthChecker) check(app domain.App) {
 									if componentInfoMap, yes := componentInfo.(map[string]interface{}); yes {
 										// check the value of status of the component if not ok or warn
 										if componentInfoMap["status"] == "nok" || componentInfoMap["status"] == "warn" {
-											logcs.Info("One component status is not ok")
+											logcs.Info(fmt.Sprintf("Status component : %s : %s", componentName, componentInfoMap["status"]))
 											// initialise the map
 											healthResponse, ok := healthResponseMap[componentName]
 											if !ok {
@@ -117,10 +117,12 @@ func (self *HealthChecker) check(app domain.App) {
 									}
 									// check if there is an error for the component which is not ok
 									if _, ok := healthResponseMap[componentName]; ok && responseKey == "error" {
+										logcs.Info(fmt.Sprintf("Error component %s is : %v", componentName, componentInfo))
 										healthResponseMap[componentName].Error = fmt.Sprintf("%v", componentInfo)
 									}
 									// check if there is an details for the component which is not ok
 									if _, ok := healthResponseMap[componentName]; ok && responseKey == "details" {
+										logcs.Info(fmt.Sprintf("Details component %s is : %v", componentName, componentInfo))
 										healthResponseMap[componentName].Details = map[string]interface{}{
 											componentName: componentInfo,
 										}
@@ -140,14 +142,13 @@ func (self *HealthChecker) check(app domain.App) {
 							"Details": "not found",
 						}
 					}
-					err := fmt.Errorf("App name is : %s\n, Name : %s\n, Error : %s\n, Details is : %s\n", u.Hostname(), value.Name, value.Error, value.Details)
-					logcs.Error(err)
+					logcs.Error(fmt.Errorf("App name is : %s\n, Name : %s\n, Error : %s\n, Details is : %s\n", u.Hostname(), value.Name, value.Error, value.Details))
 				}
 			} else {
-				logcs.Info("Status Response ist Ok")
+				logcs.Debug(fmt.Sprintf("Status App ist %d, Responce Status Code is %d", jsonResponse["status"], resp.StatusCode()))
 			}
 		} else {
-			logcs.Success("Http Response ist Ok")
+			logcs.Success(fmt.Sprintf("HTTP Response %d", resp.StatusCode()))
 		}
 	}
 }
