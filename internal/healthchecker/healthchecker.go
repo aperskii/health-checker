@@ -60,9 +60,9 @@ func (self *HealthChecker) check(app domain.App) {
 		if err != nil {
 			logcs.Fatal(err)
 			continue
-		} else {
-			logcs.Success("Request was successfully submitted")
 		}
+		logcs.Success("Request was successfully submitted")
+
 		if resp.IsError() && resp.IsInternalServerError() {
 			logcs.Info(fmt.Sprintf("Http Status Error : %d", resp.StatusCode()))
 			//create Map to store the health response
@@ -72,9 +72,8 @@ func (self *HealthChecker) check(app domain.App) {
 			if err != nil {
 				logcs.Fatal(err)
 				continue
-			} else {
-				logcs.Success("Response body is Unmarshalled successfully")
 			}
+			logcs.Success("Response body is Unmarshalled successfully")
 			//jsonFile, err := os.Open("./temp/response.json")
 			//if err != nil {
 			//	logcs.Fatal(err)
@@ -89,7 +88,7 @@ func (self *HealthChecker) check(app domain.App) {
 			//}
 			//logcs.Success("File is Unmarshalled successfully")
 			if jsonResponse["status"] == "nok" || jsonResponse["status"] == "warn" {
-				logcs.Info("Response status ist not ok")
+				logcs.Info(fmt.Sprintf("Response status is %s", jsonResponse["status"]))
 				// iterate by the slice of string for ordered the map of the response json
 				for _, orderedMap := range jsonOrder {
 					// iterate by the json response
@@ -146,9 +145,9 @@ func (self *HealthChecker) check(app domain.App) {
 				}
 			} else {
 				logcs.Debug(fmt.Sprintf("Status App ist %d, Responce Status Code is %d", jsonResponse["status"], resp.StatusCode()))
+				continue
 			}
-		} else {
-			logcs.Success(fmt.Sprintf("HTTP Response %d", resp.StatusCode()))
 		}
+		logcs.Success(fmt.Sprintf("App : %s, HTTP Response %d", u.Hostname(), resp.StatusCode()))
 	}
 }
