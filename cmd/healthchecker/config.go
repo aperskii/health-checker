@@ -6,33 +6,27 @@ import (
 	"git.ghpcard.local/csipitca/aes"
 	"git.ghpcard.local/csipitca/hash"
 	"git.ghpcard.local/csipitca/logcs"
-	"github.com/healthchecker/internal/domain"
+	"github.com/healthchecker/internal/healthchecker"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"syscall"
 )
 
 type Config struct {
-	AppName      string        `json:"app_name"`
-	Env          string        `json:"env"`
-	Version      string        `json:"version"`
-	Log          *logcs.Config `json:"log"`
-	AuthResource AuthResource  `json:"auth_resource"`
-	AuthClient   AuthClient    `json:"auth_client"`
-	Application  []domain.App  `json:"applications"`
+	AppName    string        `json:"app_name"`
+	Env        string        `json:"env"`
+	Version    string        `json:"version"`
+	Log        *logcs.Config `json:"log"`
+	AuthClient []AuthClient  `json:"auth_clients"`
 }
 
 type AuthClient struct {
-	URL          string `json:"url"`
-	ClientID     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
-	GrantType    string `json:"grant_type"`
-}
-
-type AuthResource struct {
-	URL        string `json:"url"`
-	Language   string `json:"language"`
-	ResourceID string `json:"resource_id"`
+	URL          string              `json:"url"`
+	ClientID     string              `json:"client_id"`
+	ClientSecret string              `json:"client_secret"`
+	GrantType    string              `json:"grant_type"`
+	NumWorkers   int                 `json:"num_workers"`
+	Application  []healthchecker.App `json:"applications"`
 }
 
 func (c Config) isProd() bool {
@@ -81,11 +75,14 @@ func decryptConfig(c *Config, password string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	authClientSecret, err := aesClient.Decrypt(c.AuthClient.ClientSecret)
-	if err != nil {
-		return nil, err
+	for key, element := range c.AuthClient {
+		authClientSecret, err := aesClient.Decrypt(element.ClientSecret)
+		if err != nil {
+			return nil, err
+		}
+		c.AuthClient[key].ClientSecret = authClientSecret
 	}
-	c.AuthClient.ClientSecret = authClientSecret
+
 	if c.Log.LogEmail.Enabled {
 		for i, host := range c.Log.LogEmail.EmailCfg.Hosts {
 			decryptedPassword, err := aesClient.Decrypt(host.Password)

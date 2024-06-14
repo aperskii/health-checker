@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"git.ghpcard.local/csipitca/auth"
 	"git.ghpcard.local/csipitca/logcs"
 	"github.com/healthchecker/internal/healthchecker"
@@ -38,19 +39,45 @@ func main() {
 		os.Exit(1)
 	}
 
-	authClient, err := auth.NewClientCredentialsClient(cfg.AuthClient.URL, cfg.AuthClient.ClientID, cfg.AuthClient.ClientSecret, logger, false)
-	if err != nil {
-		logcs.Error(err)
-		os.Exit(1)
-	}
+	// Enqueue jobs
+	for _, client := range cfg.AuthClient {
+		go func(client AuthClient) {
+			authClient, err := auth.NewClientCredentialsClient(client.URL, client.ClientID, client.ClientSecret, logger, false)
+			if err != nil {
+				logcs.WithAdditionalData(map[string]interface{}{
+					"client_url": client.URL,
+					"client_id":  client.ClientID,
+				}).Error(err)
+				return
+			}
+			logcs.WithAdditionalData(map[string]interface{}{
+				"client_url": client.URL,
+				"client_id":  client.ClientID,
+			}).Success("client login successfully")
 
-	healthC, err := healthchecker.NewHealthChecker(authClient, cfg.Application)
-	if err != nil {
-		logcs.Error(err)
-		os.Exit(1)
+			healthC := healthchecker.NewHealthChecker(authClient, client.Application, client.NumWorkers)
+			healthC.InitialiseMonitoring()
+		}(client)
 	}
-	healthC.InitialiseMonitoring()
 
 	ch := make(chan int)
 	<-ch
+	fmt.Println()
 }
+
+//func connect(client AuthClient, logger *logcs.Logger) {
+//	authClient, err := auth.NewClientCredentialsClient(client.URL, client.ClientID, client.ClientSecret, logger, false)
+//	if err != nil {
+//		logcs.WithAdditionalData(map[string]interface{}{
+//			"client_url": client.URL,
+//			"client_id":  client.ClientID,
+//		}).Error(err)
+//		return
+//	}
+//	logcs.WithAdditionalData(map[string]interface{}{
+//		"client_url": client.URL,
+//		"client_id":  client.ClientID,
+//	}).Success("Client login successfully")
+//	healthC := healthchecker.NewHealthChecker(authClient, client.Application)
+//	healthC.InitialiseMonitoring()
+//}

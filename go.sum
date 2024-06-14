@@ -18,6 +18,10 @@ git.ghpcard.local/csipitca/logcs v1.14.3/go.mod h1:UEOIw+Oc5uZERRIGZKVOU72CYOdaX
 git.ghpcard.local/csipitca/logcs v1.15.2 h1:mUcfpwzkBMz6p0lIFUDxj+LUCOWWF3ZmToEXF06SMZQ=
 git.ghpcard.local/csipitca/logcs v1.15.2/go.mod h1:UEOIw+Oc5uZERRIGZKVOU72CYOdaXXQov0dgdjmVqTo=
 github.com/ThomsonReutersEikon/go-ntlm v0.0.0-20181130171125-cf23bd1ecf18/go.mod h1:0eFwySJYxbNw/r8cJ01IeztpJfwrgrmiLtYig80Yvrc=
+github.com/elnormous/contenttype v1.0.4 h1:FjmVNkvQOGqSX70yvocph7keC8DtmJaLzTTq6ZOQCI8=
+github.com/elnormous/contenttype v1.0.4/go.mod h1:5KTOW8m1kdX1dLMiUJeN9szzR2xkngiv2K+RVZwWBbI=
+github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=

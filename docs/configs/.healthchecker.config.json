@@ -2,69 +2,74 @@
   "app_name": "Health Checker",
   "version": "v1.0",
   "log": {
-    "log_path": "./logs/",
-    "filename": "healthchecker",
-    "file_extension": ".log",
     "level": "DEBUG",
-    "max_file_size": 209715200,
-    "max_age_days": 1,
-    "max_storage_size": 3221225472,
     "log_stdout": true,
     "log_stderr": false,
-    "archive_path" : ".logs/archive",
-    "log_err_email" : {
-      "enabled" : false,
-      "clear_cache_interval_seconds" : 99999999,
-      "alert_recipients" : ["test@tc-s.eu"],
+    "log_file": {
+      "enabled": true,
+      "log_path": "./logs/",
+      "filename": "health-checker",
+      "file_extension": ".log",
+      "max_file_size": 209715200,
+      "max_age_days": 1,
+      "max_storage_size": 3221225472,
+      "archive_path": ""
+    },
+    "log_email": {
+      "enabled": true,
+      "level": "ERROR",
+      "clear_cache_interval_seconds": 3600,
+      "alert_recipients": [
+        "yberqiqch@tc-s.eu"
+      ],
       "email_config": {
-        "subject_prefix":  "Logs HealthChecker",
+        "subject_prefix": "Health-Checker",
         "hosts": [
           {
             "hostname": "mail2.tc-s.eu",
-            "port":  25,
+            "port": 25,
             "username": "noreply@ghpcard.local",
-            "email_from":  "noreply@tc-s.eu",
+            "email_from": "noreply@tc-s.eu",
             "password": "6dEyJeYny-5Culojk1ScpaZMAIWzJOBT3EjNbFnbnij85I8g2gCaww==",
-            "connection_security":  "STARTTLS",
+            "connection_security": "STARTTLS",
             "auth_method": "LOGIN",
-            "insecure_skip_verify" : true
+            "connection_timeout": 5000,
+            "insecure_skip_verify": false
           }
-        ],
-        "templates_path":  "",
-        "templates_extensions": ""
+        ]
       }
     }
   },
-  "applications": [
+  "auth_clients":[
     {
-      "app_url": "https://pinmanager-test.shell.com/v1/health",
-      "recipients": ["yberqiqch@tc-s.eu"],
-      "check_interval_seconds": 5,
-      "send_email_seconds" : 3600
+      "url": "https://testauth.tc-s.eu",
+      "client_id": "yberqiqch",
+      "client_secret": "bQ71z34laYySYhtc32R0VxtEwKWwtLnUyiA-ADmuhgKqWxnuwI9icWUTV0k8",
+      "grant_type": "client_credentials",
+      "num_workers": 2,
+      "applications": [
+        {
+          "app_name": "pin manager",
+          "app_url": "https://pinmanager-test.shell.com/v1/health",
+          "recipients": ["yberqiqch@tc-s.eu"],
+          "check_interval_seconds" : 20
+        }
+      ]
+    },
+    {
+      "url": "https://testoauth.tc-s.eu",
+      "client_id": "test",
+      "client_secret": "bQ71z34laYySYhtc32R0VxtEwKWwtLnUyiA-ADmuhgKqWxnuwI9icWUTV0k8",
+      "grant_type": "client_credentials",
+      "num_workers": 2,
+      "applications": [
+        {
+          "app_name": "pnp test",
+          "app_url": "https://pnptest.tc-s.eu/v1/health",
+          "recipients": ["yberqiqch@tc-s.eu"],
+          "check_interval_seconds" : 5
+        }
+      ]
     }
-  ],
-  "auth_client": {
-    "url": "https://testauth.tc-s.eu",
-    "client_id": "yberqiqch",
-    "client_secret": "bQ71z34laYySYhtc32R0VxtEwKWwtLnUyiA-ADmuhgKqWxnuwI9icWUTV0k8",
-    "grant_type": "client_credentials"
-  },
-  "email_config": {
-    "subject_prefix":  "HealthChecker",
-    "hosts": [
-      {
-        "hostname": "mail2.tc-s.eu",
-        "port":  25,
-        "username": "noreply@ghpcard.local",
-        "email_from":  "noreply@tc-s.eu",
-        "password": "6dEyJeYny-5Culojk1ScpaZMAIWzJOBT3EjNbFnbnij85I8g2gCaww==",
-        "connection_security":  "STARTTLS",
-        "auth_method": "LOGIN",
-        "insecure_skip_verify" : true
-      }
-    ],
-    "templates_path":  "./views/",
-    "templates_extensions": ".gohtml"
-  }
+  ]
 }
-
