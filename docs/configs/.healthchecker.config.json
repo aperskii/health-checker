@@ -1,6 +1,7 @@
 {
   "app_name": "Health Checker",
   "version": "v1.0",
+  "num_workers": 2,
   "log": {
     "level": "DEBUG",
     "log_stdout": true,
@@ -46,7 +47,6 @@
       "client_id": "yberqiqch",
       "client_secret": "bQ71z34laYySYhtc32R0VxtEwKWwtLnUyiA-ADmuhgKqWxnuwI9icWUTV0k8",
       "grant_type": "client_credentials",
-      "num_workers": 2,
       "applications": [
         {
           "app_name": "pin manager",
@@ -61,13 +61,26 @@
       "client_id": "test",
       "client_secret": "bQ71z34laYySYhtc32R0VxtEwKWwtLnUyiA-ADmuhgKqWxnuwI9icWUTV0k8",
       "grant_type": "client_credentials",
-      "num_workers": 2,
       "applications": [
         {
           "app_name": "pnp test",
           "app_url": "https://pnptest.tc-s.eu/v1/health",
           "recipients": ["yberqiqch@tc-s.eu"],
           "check_interval_seconds" : 5
+        }
+      ]
+    },
+    {
+      "url": "https://testauth.tc-s.eu",
+      "client_id": "yberqiqch",
+      "client_secret": "bQ71z34laYySYhtc32R0VxtEwKWwtLnUyiA-ADmuhgKqWxnuwI9icWUTV0k8",
+      "grant_type": "client_credentials",
+      "applications": [
+        {
+          "app_name": "test manager",
+          "app_url": "https://pinmanager-test.shell.com/v1/health",
+          "recipients": ["yberqiqch@tc-s.eu"],
+          "check_interval_seconds" : 10
         }
       ]
     }

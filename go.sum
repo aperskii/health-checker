@@ -17,6 +17,8 @@ git.ghpcard.local/csipitca/logcs v1.14.3 h1:dhldbozG9p4G4BMga+8ESBfTM1QLL0vPKyrc
 git.ghpcard.local/csipitca/logcs v1.14.3/go.mod h1:UEOIw+Oc5uZERRIGZKVOU72CYOdaXXQov0dgdjmVqTo=
 git.ghpcard.local/csipitca/logcs v1.15.2 h1:mUcfpwzkBMz6p0lIFUDxj+LUCOWWF3ZmToEXF06SMZQ=
 git.ghpcard.local/csipitca/logcs v1.15.2/go.mod h1:UEOIw+Oc5uZERRIGZKVOU72CYOdaXXQov0dgdjmVqTo=
+git.ghpcard.local/csipitca/rand v1.3.4 h1:BZzVC9oepBCAw9WSZUCWEl7ru9G7W2rSLdtbHrnexdY=
+git.ghpcard.local/csipitca/rand v1.3.4/go.mod h1:bX4xiHhETpbuA2QiY0p9HvxJjjEJOSXEcNP3cJhCw9A=
 github.com/ThomsonReutersEikon/go-ntlm v0.0.0-20181130171125-cf23bd1ecf18/go.mod h1:0eFwySJYxbNw/r8cJ01IeztpJfwrgrmiLtYig80Yvrc=
 github.com/elnormous/contenttype v1.0.4 h1:FjmVNkvQOGqSX70yvocph7keC8DtmJaLzTTq6ZOQCI8=
 github.com/elnormous/contenttype v1.0.4/go.mod h1:5KTOW8m1kdX1dLMiUJeN9szzR2xkngiv2K+RVZwWBbI=

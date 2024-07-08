@@ -15,6 +15,7 @@ import (
 type Config struct {
 	AppName    string        `json:"app_name"`
 	Env        string        `json:"env"`
+	NumWorkers int           `json:"num_workers"`
 	Version    string        `json:"version"`
 	Log        *logcs.Config `json:"log"`
 	AuthClient []AuthClient  `json:"auth_clients"`
@@ -25,7 +26,6 @@ type AuthClient struct {
 	ClientID     string              `json:"client_id"`
 	ClientSecret string              `json:"client_secret"`
 	GrantType    string              `json:"grant_type"`
-	NumWorkers   int                 `json:"num_workers"`
 	Application  []healthchecker.App `json:"applications"`
 }
 

@@ -17,8 +17,7 @@ var (
 
 type HealthChecker struct {
 	authClient *auth.ClientCredentialsClient
-	apps       []App
-	numWorker  int
+	App        App
 }
 
 type App struct {
@@ -28,47 +27,18 @@ type App struct {
 	CheckIntervalSeconds time.Duration `json:"check_interval_seconds"`
 }
 
-func NewHealthChecker(authResourceClient *auth.ClientCredentialsClient, apps []App, numWorker int) *HealthChecker {
-	if numWorker < 1 {
-		numWorker = 1
-	}
+func NewHealthChecker(authResourceClient *auth.ClientCredentialsClient, app App) *HealthChecker {
 	healthChecker := &HealthChecker{
 		authClient: authResourceClient,
-		apps:       apps,
-		numWorker:  numWorker,
+		App:        app,
 	}
 	return healthChecker
 }
 
 func (self *HealthChecker) InitialiseMonitoring() {
-	self.monitoring()
-}
-
-func (self *HealthChecker) monitoring() {
-	// Create a channel for jobs (applications)
-	jobs := make(chan App)
-	//jobs := make(chan App, len(self.apps)) // Buffer size of 10, adjust as needed
-	for w := 1; w <= self.numWorker; w++ {
-		go self.worker(w, jobs)
-	}
-	// Periodically enqueue applications
-	go func() {
-		for {
-			for _, app := range self.apps {
-				jobs <- app
-				time.Sleep(app.CheckIntervalSeconds * time.Second)
-			}
-		}
-	}()
-}
-
-// Worker function to process applications
-func (self *HealthChecker) worker(id int, jobs <-chan App) {
-	for app := range jobs {
-		logcs.Debug(fmt.Sprintf("Worker %d starting job for app URL: %s\n", id, app.AppURL))
-		self.check(app)
-		logcs.Debug(fmt.Sprintf("Worker %d finished job for app URL: %s\n", id, app.AppURL))
-	}
+	self.check()
+	// Wait for the interval before checking again
+	time.Sleep(self.App.CheckIntervalSeconds * time.Second)
 }
 
 type HealthResponse struct {
@@ -79,50 +49,50 @@ type HealthResponse struct {
 	Details map[string]interface{}
 }
 
-func (self *HealthChecker) check(app App) {
+func (self *HealthChecker) check() {
 	requestID := uuid.New().String()
-	u, err := url.Parse(app.AppURL)
+	u, err := url.Parse(self.App.AppURL)
 	if err != nil {
 		logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-			"app-url": app.AppURL,
+			"app-url": self.App.AppURL,
 		}).Error(err)
 		return
 	}
 	logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-		"app-name": app.AppName,
+		"app-name": self.App.AppName,
 	}).Success("starting health check")
 	authResourceClient := self.authClient.NewResourceClient(u.Scheme + "://" + u.Hostname())
 	resp, err := authResourceClient.GET("", u.Path)
 	if err != nil {
 		logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-			"app-name": app.AppName,
+			"app-name": self.App.AppName,
 		}).Error(err)
 		return
 	}
 	if resp.IsBadRequest() {
 		logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-			"app-name":    app.AppName,
+			"app-name":    self.App.AppName,
 			"status-code": resp.StatusCode(),
 		}).Info("receive bad request")
 		return
 	}
 	if resp.IsSuccess() {
 		logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-			"app-name":    app.AppName,
+			"app-name":    self.App.AppName,
 			"status-code": resp.StatusCode(),
 		}).Success("receive successfully request")
 		return
 	}
 	if resp.IsError() && resp.IsInternalServerError() {
 		logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-			"app-name":    app.AppName,
+			"app-name":    self.App.AppName,
 			"status-code": resp.StatusCode(),
 		}).Info("receive server error")
 		var jsonResponse map[string]interface{}
 		err = json.Unmarshal(resp.Body(), &jsonResponse)
 		if err != nil {
 			logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-				"app-name":      app.AppName,
+				"app-name":      self.App.AppName,
 				"response-body": formatJson(resp.Body()),
 			}).Error(err)
 			return
@@ -142,7 +112,7 @@ func (self *HealthChecker) check(app App) {
 		//logcs.Success("File is Unmarshalled successfully")
 		if jsonResponse["status"] == "nok" || jsonResponse["status"] == "warn" {
 			logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-				"app-name":        app.AppName,
+				"app-name":        self.App.AppName,
 				"app-url":         u.String(),
 				"response-status": jsonResponse["status"],
 			}).Info("response status")
@@ -161,7 +131,7 @@ func (self *HealthChecker) check(app App) {
 									// check the value of status of the component if not ok or warn
 									if componentInfoMap["status"] == "nok" || componentInfoMap["status"] == "warn" {
 										logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-											"app-name":           app.AppName,
+											"app-name":           self.App.AppName,
 											"component_name":     componentName,
 											"component_info_map": componentInfoMap,
 										}).Info("component not ok")
@@ -179,7 +149,7 @@ func (self *HealthChecker) check(app App) {
 								// check if there is an error for the component which is not ok
 								if _, ok := healthResponseMap[componentName]; ok && responseKey == "error" {
 									logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-										"app-name":       app.AppName,
+										"app-name":       self.App.AppName,
 										"component_name": componentName,
 										"component_info": componentInfo,
 									}).Info("component error found")
@@ -188,7 +158,7 @@ func (self *HealthChecker) check(app App) {
 								// check if there is an details for the component which is not ok
 								if _, ok := healthResponseMap[componentName]; ok && responseKey == "details" {
 									logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-										"app-name":       app.AppName,
+										"app-name":       self.App.AppName,
 										"component_name": componentName,
 										"component_info": componentInfo,
 									}).Info("component details found")
@@ -219,7 +189,7 @@ func (self *HealthChecker) check(app App) {
 				}).Error(fmt.Errorf("health check result"))
 			}
 			logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-				"app-name": app.AppName,
+				"app-name": self.App.AppName,
 			}).Success("health check finished")
 		} else {
 			logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
