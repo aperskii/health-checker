@@ -3,8 +3,6 @@ package healthchecker
 import (
 	"encoding/json"
 	"fmt"
-	"git.ghpcard.local/csipitca/auth"
-	"git.ghpcard.local/csipitca/logcs"
 	"github.com/google/uuid"
 	"net/url"
 	"strings"
@@ -97,19 +95,6 @@ func (self *HealthChecker) check() {
 			}).Error(err)
 			return
 		}
-		//jsonFile, err := os.Open("./temp/response.json")
-		//if err != nil {
-		//	logcs.Fatal(err)
-		//	return
-		//}
-		//logcs.Success("Testing File is Opened")
-		//byteValue, _ := ioutil.ReadAll(jsonFile)
-		//err = json.Unmarshal(byteValue, &jsonResponse)
-		//if err != nil {
-		//	logcs.Fatal(err)
-		//	return
-		//}
-		//logcs.Success("File is Unmarshalled successfully")
 		if jsonResponse["status"] == "nok" || jsonResponse["status"] == "warn" {
 			logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
 				"app-name":        self.App.AppName,
@@ -117,7 +102,7 @@ func (self *HealthChecker) check() {
 				"response-status": jsonResponse["status"],
 			}).Info("response status")
 			//create Map to store the health response
-			var healthResponseMap = make(map[string]*HealthResponse)
+			healthResponse := new(HealthResponse)
 			// iterate by the slice of string for ordered the map of the response json
 			for _, orderedMap := range jsonOrder {
 				// iterate by the json response
@@ -135,58 +120,52 @@ func (self *HealthChecker) check() {
 											"component_name":     componentName,
 											"component_info_map": componentInfoMap,
 										}).Info("component not ok")
-										// initialise the map
-										healthResponse, exists := healthResponseMap[componentName]
-										if !exists {
-											healthResponse = &HealthResponse{}
-										}
-										healthResponseMap[componentName] = healthResponse
 										// put the name and status of component which is not ok in map
-										healthResponse.Name = componentName
-										healthResponse.Status = fmt.Sprintf("%s", componentInfoMap["status"])
+										healthResponse = &HealthResponse{
+											AppUrl: self.App.AppName,
+											Name:   componentName,
+											Status: fmt.Sprintf("%s", componentInfoMap["status"]),
+										}
 									}
 								}
 								// check if there is an error for the component which is not ok
-								if _, ok := healthResponseMap[componentName]; ok && responseKey == "error" {
+								if responseKey == "error" {
 									logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
 										"app-name":       self.App.AppName,
 										"component_name": componentName,
 										"component_info": componentInfo,
 									}).Info("component error found")
-									healthResponseMap[componentName].Error = fmt.Sprintf("%v", componentInfo)
+									healthResponse.Error = fmt.Sprintf("%v", componentInfo)
 								}
 								// check if there is an details for the component which is not ok
-								if _, ok := healthResponseMap[componentName]; ok && responseKey == "details" {
+								if responseKey == "details" {
 									logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
 										"app-name":       self.App.AppName,
 										"component_name": componentName,
 										"component_info": componentInfo,
 									}).Info("component details found")
-									healthResponseMap[componentName].Details = map[string]interface{}{
+									healthResponse.Details = map[string]interface{}{
 										componentName: componentInfo,
 									}
 								}
+								if healthResponse.Error != "" {
+									healthResponse.Error = "error not found"
+								}
+								if healthResponse.Details != nil {
+									healthResponse.Details = map[string]interface{}{
+										"Details": "not found",
+									}
+								}
+								logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
+									"app-url":           healthResponse.AppUrl,
+									"component-name":    healthResponse.Name,
+									"component-error":   healthResponse.Error,
+									"component-details": healthResponse.Details,
+								}).Error(fmt.Errorf("health check result"))
 							}
 						}
 					}
 				}
-			}
-			// Formatting Error Email
-			for _, value := range healthResponseMap {
-				if len(value.Error) == 0 {
-					value.Error = "error not found"
-				}
-				if len(value.Details) == 0 {
-					value.Details = map[string]interface{}{
-						"Details": "not found",
-					}
-				}
-				logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
-					"app-url":           u.Hostname(),
-					"component-name":    value.Name,
-					"component-error":   value.Error,
-					"component-details": value.Details,
-				}).Error(fmt.Errorf("health check result"))
 			}
 			logcs.WithRequestId(requestID).WithAdditionalData(map[string]interface{}{
 				"app-name": self.App.AppName,

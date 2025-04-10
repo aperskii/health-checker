@@ -98,7 +98,6 @@ func main() {
 			jobs <- app
 		}
 	}()
-
 	// Wait for workers to finish
 	wg.Wait()
 	ch := make(chan int)
